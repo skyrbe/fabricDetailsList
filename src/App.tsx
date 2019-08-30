@@ -4,15 +4,14 @@ import {
   DetailsHeader,
   DetailsList,
   IColumn,
-  IDetailsHeaderProps,
   IDetailsList,
   IGroup,
-  IRenderFunction,
   IToggleStyles,
   mergeStyles,
   Toggle
 } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import { generateNodelist, responseData } from './helper';
 
 const margin = '0 20px 20px 0';
 const controlWrapperClass = mergeStyles({
@@ -63,64 +62,32 @@ export class App extends React.Component<{}, IDetailsListGroupedExampleState> {
   }
 
   public componentDidMount() {
-    const responseData = [
-      {
-        name: 'Timing',
-        category:0,
-        metrics:[
-          {
-            testType:[0,1],
-            metric: 0,
-            count: 0,
-            name: 'Response1',
-            unit: 'ms',
-          },
-          {
-            testType:[0,1],
-            metric: 0,
-            count: 0,
-            name: 'Response2',
-            unit: 'ms',
-          },
-          {
-            testType:[0,1],
-            metric: 0,
-            count: 0,
-            name: 'Response3',
-            unit: 'ms',
-          }
-        ]
-      },
-      {
-        name: 'Category',
-        category:1,
-        metrics:[
-          {
-            testType:[1,2,3],
-            metric: 1,
-            count: 0,
-            name: 'Metric',
-            unit: 'ms',
-          }
-        ]
-      }
-    ];
-    const items:any = [];
-    const groups:any = [];
-    responseData.forEach((item, index) => {
-      groups.push({
-        key: item.name,
-        name: item.name,
-        startIndex: groups[index-1] ? groups[index-1].startIndex + responseData[index-1].metrics.length : 0,
-        count: item.metrics.length
-      });
+    
+    let response = {
+      items: Array(),
+      groups: Array()
+    };
+    let startIndex = 0;
+    let count = 0;
       
-      items.push(...item.metrics);
-    });
-
+    for(var i = 0; i < responseData.length; i++) {
+      let generatedList = generateNodelist(responseData[i], 'metrics', [], [], startIndex+count);
+      response = {
+        items: [
+          ...response.items,
+          ...generatedList.items
+        ],
+        groups: [
+          ...response.groups,
+          ...generatedList.groups
+        ]
+      };
+      startIndex = response.groups[response.groups.length - 1].startIndex;
+      count = response.groups[response.groups.length - 1].count;
+    }
     this.setState({
-      items,
-      groups
+      items: response.items,
+      groups: response.groups
     });
   }
 
